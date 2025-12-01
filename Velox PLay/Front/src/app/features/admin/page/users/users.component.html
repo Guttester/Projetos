@@ -1,0 +1,464 @@
+<div class="flex min-h-screen bg-[#F4F6F8]">
+  <app-sidebar-left  (expandedChange)="onSidebarToggle($event)"></app-sidebar-left>>
+
+    <!-- Bloco que move junto com o sidebar -->
+  <div class="flex flex-col flex-1 transition-all duration-300" [ngClass]="{ 'pl-60': isSidebarExpanded, 'pl-16': !isSidebarExpanded }">
+
+    <!-- Topbar dentro do mesmo bloco -->
+    <app-topbar></app-topbar>
+
+    <!-- Conteúdo -->
+    <div class="p-6 flex-1">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">Users</h1>
+        <button
+            (click)="openModal()"
+            class="text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded shadow"
+            title="Novo Cadastro"
+        >
+            <i class="fas fa-plus"></i>
+        </button>
+        </div>
+
+        <!-- View: users -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-orange-200">
+            <thead class="bg-orange-100 text-gray-700">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Email</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Favoritos</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">Senha</th>
+               <th class="px-6 py-3 text-left text-xs font-medium uppercase">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-orange-200 text-sm">
+              <tr
+                *ngFor="let user of users; let i = index"
+                [ngClass]="i % 2 === 0 ? 'bg-white' : 'bg-orange-50'"
+                
+              >
+                <td class="px-6 py-4">{{ user.id }}</td>
+                <td class="px-6 py-4">{{ user.nome }}</td>
+                <td class="px-6 py-4">{{ user.email }}</td>
+                <td class="px-6 py-4">{{ user.favoritos?.length }}</td>
+                <td class="px-6 py-4">{{ user.senha }}</td>
+
+                <td class="px-6 py-4 space-x-2">
+                  <!-- hover:text-blue-700 -->
+                  <button class="text-blue-500 opacity-70"><i class="fas fa-eye"></i></button>
+                  <button class="text-yellow-500 hover:text-yellow-700" (click)="updateModal(user)"><i class="fas fa-edit"></i></button>
+                  <button class="text-red-500 hover:text-red-700" (click)="excluirUser(user.id!)" ><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modal: Novo Usuário -->
+        <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
+            <h2 class="text-xl font-bold mb-4">Velox Play™: gestão de cadastro de Usuário</h2>
+            <hr class="mt-0 mb-8 border-t border-gray-400/30" />
+
+            <!-- Botão Fechar -->
+            <button (click)="confirmCloseModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">
+              &times;
+            </button>
+
+            <!-- Formulário 2 colunas -->
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-4" #userForm="ngForm">
+              <!-- Nome -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite seu Nome <span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Coloque seu nome completo!</span>
+                </label>
+                <input [(ngModel)]="novoUser.nome" name="nameUser" required type="text"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [ngClass]="{ 'border-red-500': userForm.submitted && !novoUser.nome }" />
+              </div>
+
+              <!-- Tipo User -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Tipo de Usuário <span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Selecione oque você é!</span>
+                </label>
+                <select [(ngModel)]="novoUser.tipoUser" name="tipoUser" required
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [ngClass]="{ 'border-red-500': userForm.submitted && !novoUser.tipoUser }">
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="Administrador">Administrador</option>
+                  <option value="Manager">Manager</option>
+                  <option value="User">User</option>
+                </select>
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite seu Email <span class="text-red-500">*</span></span>
+                  <span class="text-xs" [ngClass]="{ 'text-gray-500': !emailInvalido, 'text-red-600 font-semibold': emailInvalido }">
+                    {{ emailInvalido ? 'Os emails não coincidem!' : 'Insira seu email!' }}
+                  </span>
+                </label>
+                <input [(ngModel)]="novoUser.email" name="email" required type="email"
+                  class="w-full px-3 py-2 border rounded focus:outline-none {{ (userForm.submitted && !novoUser.email) || emailInvalido ? ' border-red-500' : '' }}" />
+              </div>
+
+              <!-- Confirmar Email -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite novamente seu Email <span class="text-red-500">*</span></span>
+                  <span class="text-xs" [ngClass]="{ 'text-gray-500': !emailInvalido, 'text-red-600 font-semibold': emailInvalido }">
+                    {{ emailInvalido ? 'Os emails não coincidem!' : 'Confirme seu email!' }}
+                  </span>
+                </label>
+                <input [(ngModel)]="novoUser.confirmarEmail" name="confirmarEmail" required type="email"
+                  class="w-full px-3 py-2 border rounded focus:outline-none {{ (userForm.submitted && !novoUser.confirmarEmail) || emailInvalido ? ' border-red-500' : '' }}" />
+              </div>
+
+              <!-- Senha -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite sua Senha <span class="text-red-500">*</span></span>
+                  <span class="text-xs" [ngClass]="{'text-gray-500': !senhaInvalido,'text-red-600 font-semibold': senhaInvalido}">
+                    {{ senhaInvalido ? 'As senhas não coincidem!' : 'Insira sua senha!' }}
+                  </span>
+                </label>
+                <div class="relative">
+                  <input [(ngModel)]="novoUser.senha" name="password" required
+                    [type]="mostrarSenha ? 'text' : 'password'"
+                    class="w-full px-3 py-2 border rounded focus:outline-none pr-10 {{ (userForm.submitted && !novoUser.senha) || senhaInvalido ? ' border-red-500' : '' }}" />
+                  <button type="button" (click)="mostrarSenha = !mostrarSenha"
+                    class="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                    <i class="fas" [ngClass]="mostrarSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Confirmar Senha -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite novamente sua Senha <span class="text-red-500">*</span></span>
+                  <span class="text-xs" [ngClass]="{'text-gray-500': !senhaInvalido,'text-red-600 font-semibold': senhaInvalido}">
+                    {{ senhaInvalido? 'As senhas não coincidem!' : 'Confirme sua senha!' }}
+                  </span>
+                </label>
+                <div class="relative">
+                  <input [(ngModel)]="novoUser.confirmarSenha" name="confirmarSenha" required
+                    [type]="mostrarConfirmacao ? 'text' : 'password'"
+                    class="w-full px-3 py-2 border rounded focus:outline-none pr-10 {{ (userForm.submitted && !novoUser.confirmarSenha) || senhaInvalido ? ' border-red-500' : '' }}" />
+                  <button type="button" (click)="mostrarConfirmacao = !mostrarConfirmacao"
+                    class="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                    <i class="fas" [ngClass]="mostrarConfirmacao ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <!-- Checkboxes -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+              <div class="flex items-start">
+                <input type="checkbox" id="aceiteTermos" name="aceiteTermos" [checked]="aceiteTermos"
+                  (change)="aceiteTermos = !aceiteTermos" required class="mt-1.5 mr-2" />
+                <label for="aceiteTermos" class="text-sm text-gray-700 leading-5">
+                  Concordo com os <span class="underline cursor-pointer text-gray-700">Termos e Condições</span>.
+                  <span class="text-red-500"> *</span>
+                </label>
+              </div>
+              <div class="flex items-start">
+                <input type="checkbox" id="notificacoes" name="notificacoes" [checked]="receberNotificacoes"
+                  (change)="receberNotificacoes = !receberNotificacoes" class="mt-1.5 mr-2" />
+                <label for="notificacoes" class="text-sm text-gray-700 leading-5">
+                  Desejo receber novidades e lançamentos da plataforma <strong class="text-orange-400">Velox Play™</strong> .
+                </label>
+              </div>
+            </div>
+
+            
+            <hr class="mt-16 border-t border-gray-400/30" />
+
+            <!-- Ações -->
+            <div class="flex justify-end gap-4 mt-6">
+              <button (click)="confirmCloseModal()" class="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition duration-200">
+                Cancelar
+              </button>
+              <button (click)="adicionarUser(userForm)"
+                class="px-4 py-2 bg-[#30384F] text-white rounded hover:bg-[#1f2535] transition duration-200">
+                Cadastrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal: Editar Usuário -->
+        <div *ngIf="isModalUpdate" class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
+            <h2 class="text-xl font-bold mb-4">Velox Play™: atualizar dados do usuário</h2>
+            <hr class="mt-0 mb-8 border-t border-gray-400/30" />
+
+            <!-- Botão Fechar -->
+            <button (click)="confirmCloseModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">
+              &times;
+            </button>
+
+            <!-- Formulário 2 colunas -->
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-4" #editForm="ngForm">
+              <!-- ID (somente visualização) -->
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>ID do Usuário</span>
+                  <span *ngIf="userEdit.id" class="text-xs text-gray-500 text-right">
+                    Campo não editável
+                  </span>
+                </label>
+                <input
+                  [(ngModel)]="userEdit.id"
+                  name="id"
+                  type="text"
+                  disabled
+                  class="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed opacity-70 text-right"
+                />
+              </div>
+              
+              <!-- Nome -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span> Nome completo <span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs" [ngClass]="{ 'text-gray-500': !nameInvalido, 'text-red-60 font-semibold': nameInvalido }">
+                    {{ nameInvalido ? 'Nome inválido ou ausente!' : 'Insira seu nome completo!' }}
+                  </span>
+                </label>
+                <input [(ngModel)]="userEdit.nome" name="nameUser" required type="text" [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [ngClass]="{ 'border-red-500': editForm.submitted && !userEdit.nome, 
+                            'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat}"
+                  />
+              </div>
+
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite seu Email <span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs" [ngClass]="{ 'text-gray-500': !emailInvalido, 'text-red-600 font-semibold': emailInvalido }">
+                    {{ emailInvalido ? 'Os emails não coincidem!' : 'Insira seu email!' }}
+                  </span>
+                </label>
+                <input
+                  [(ngModel)]="userEdit.email"
+                  name="email"
+                  required
+                  type="email"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [disabled]="inputStat"
+                  [ngClass]="{ 'border-red-500': editForm.submitted && !userEdit.email || emailInvalido,
+                              'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat}"
+                />
+              </div>
+
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>
+                    Digite sua Senha <span class="text-red-500">*</span>
+                  </span>
+                  <span 
+                    *ngIf="!inputStat" 
+                    class="text-xs"
+                    [ngClass]="{
+                      'text-gray-500': !senhaInvalido,
+                      'text-red-600 font-semibold': senhaInvalido
+                    }">
+                    {{ senhaInvalido ? 'As senhas não coincidem!' : 'Insira sua senha!' }}
+                  </span>
+                </label>
+                <div class="relative">
+                  <input
+                    [(ngModel)]="userEdit.senha"
+                    name="confirmarSenha"
+                    required
+                    [type]="mostrarSenha ? 'text' : 'password'"
+                    class="w-full px-3 py-2 border rounded focus:outline-none pr-10"
+                    [disabled]="inputStat"
+                    [ngClass]="{
+                      'border-red-500': editForm.submitted && !userEdit.senha || senhaInvalido,
+                      'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                    }"
+                  />
+                  <button
+                    type="button"
+                    (click)="mostrarSenha = !mostrarSenha"
+                    [disabled]="inputStat"
+                    class="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    [ngClass]="{
+                      'border-red-500': editForm.submitted && !userEdit.confirmarSenha || senhaInvalido,
+                      'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                    }"
+                  >
+                    <i class="fas" [ngClass]="mostrarSenha ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Digite novamente seu Email <span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs" [ngClass]="{ 'text-gray-500': !emailInvalido, 'text-red-600 font-semibold': emailInvalido }">
+                    {{ emailInvalido ? 'Os emails não coincidem!' : 'Confirme seu email!' }}
+                  </span>
+                </label>
+                <input
+                  [(ngModel)]="userEdit.confirmarEmail"
+                  name="confirmarEmail"
+                  required
+                  type="email"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [disabled]="inputStat"
+                  [ngClass]="{ 'border-red-500': editForm.submitted && !userEdit.confirmarEmail || emailInvalido,
+                              'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat}"
+                  />
+              </div>
+
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>
+                    Digite novamente sua Senha <span class="text-red-500">*</span>
+                  </span>
+                  <span 
+                    *ngIf="!inputStat" 
+                    class="text-xs"
+                    [ngClass]="{
+                      'text-gray-500': !senhaInvalido,
+                      'text-red-600 font-semibold': senhaInvalido
+                    }">
+                    {{ senhaInvalido ? 'As senhas não coincidem!' : 'Confirme sua senha!' }}
+                  </span>
+                </label>
+                <div class="relative">
+                  <input
+                    [(ngModel)]="userEdit.senha"
+                    name="password"
+                    required
+                    [type]="mostrarConfirmacao ? 'text' : 'password'"
+                    class="w-full px-3 py-2 border rounded focus:outline-none pr-10"
+                    [disabled]="inputStat"
+                    [ngClass]="{
+                      'border-red-500': editForm.submitted && !userEdit.senha || senhaInvalido,
+                      'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                    }"
+                  />
+                  <button
+                    type="button"
+                    (click)="mostrarConfirmacao = !mostrarConfirmacao"
+                    [disabled]="inputStat"
+                    class="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    [ngClass]="{
+                      'border-red-500': editForm.submitted && !userEdit.senha || senhaInvalido,
+                      'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                    }"
+                  >
+                    <i class="fas" [ngClass]="mostrarConfirmacao ? 'fa-eye-slash' : 'fa-eye'"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tipo User -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Tipo de Usuário <span class="text-gray-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Selecione oque você é!</span>
+                </label>
+                <select [(ngModel)]="userEdit.tipoUser" name="tipoUser" required [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [ngClass]="{ 'border-red-500': editForm.submitted && !userEdit.tipoUser,
+                  'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat }">
+                  <option value="" disabled>Selecione</option>
+                  <option value="Administrador">Administrador</option>
+                  <option value="Manager">Manager</option>
+                  <option value="User">User</option>
+                </select>
+              </div>
+
+              <hr class=" md:col-span-2 mt-3 border-t border-gray-400/30" />
+
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Selecione um Filme para adicionar Favoritos</span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">
+                    Selecione um filme!
+                  </span>
+                </label>
+
+                <select
+                  [(ngModel)]="filmeSelecionado"
+                  (change)="onFilmeSelecionadoChange()"
+                  name="filmeSelecionado"
+                  [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded focus:outline-none"
+                  [ngClass]="{
+                    'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                  }"
+                >
+                  <option [ngValue]="null" disabled>Selecione</option>
+
+                  <option *ngFor="let filme of filmes" [ngValue]="filme">
+                    {{ filme.titulo }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Favoritos do Usuário</span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Lista atual de favoritos</span>
+                </label>
+
+                  <div
+                    class="w-full px-3 py-2 border rounded"
+                    [ngClass]="inputStat 
+                      ? 'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70' 
+                      : 'bg-white text-gray-900'"
+                  >
+                  <ul *ngIf="userEdit.favoritos && userEdit.favoritos.length > 0">
+                    <li *ngFor="let f of userEdit.favoritos" class="py-1 border-b last:border-none">
+                      {{ f.titulo }}
+                    </li>
+                  </ul>
+
+                  <p *ngIf="userEdit.favoritos?.length === 0">
+                    Nenhum favorito ainda.
+                  </p>
+                </div>
+              </div>
+
+            </form>
+
+            <hr class="mt-16 border-t border-gray-400/30" />
+
+            <!-- Ações -->
+            <div class="flex justify-end gap-4 mt-6">
+              <button (click)="confirmCloseModal()" class="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition duration-200">
+                Cancelar
+              </button>
+              <button (click)="editInput()" class="px-4 py-2 rounded text-white hover:bg-yellow-700 bg-yellow-500 ">
+                Editar
+              </button>
+              <button [disabled]="inputStat" (click)="atualizarUser(editForm)"
+                class="px-4 py-2 bg-[#30384F] text-white rounded transition duration-200 hover:bg-[#1f2535]"
+                [ngClass]="{
+                  'cursor-not-allowed opacity-70': inputStat
+                }"
+                title="Para atualizar você deve destravar com o botão 'Editar'"
+              >
+                Atualizar
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>  
+</div>

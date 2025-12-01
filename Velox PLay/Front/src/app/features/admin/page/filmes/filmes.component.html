@@ -1,0 +1,330 @@
+<div class="flex min-h-screen bg-[#F4F6F8]">
+  <app-sidebar-left  (expandedChange)="onSidebarToggle($event)"></app-sidebar-left>>
+
+    <!-- Bloco que move junto com o sidebar -->
+  <div class="flex flex-col flex-1 transition-all duration-300" [ngClass]="{ 'pl-60': isSidebarExpanded, 'pl-16': !isSidebarExpanded }">
+
+    <!-- Topbar dentro do mesmo bloco -->
+    <app-topbar></app-topbar>
+
+    <!-- Conteúdo -->
+    <div class="p-6 flex-1">
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-semibold">Filmes</h1>
+        <button
+            (click)="openModal()"
+            class="text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded shadow"
+            title="Novo Cadastro"
+        >
+            <i class="fas fa-plus"></i>
+        </button>
+        </div>
+
+        <!-- View: Filmes -->
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-orange-200">
+            <thead class="bg-orange-100 text-gray-700">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">GENERO</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">TITULO</th>
+                <th class="px-6 py-3 text-left text-xs font-medium uppercase">DESCRICAO</th>
+               <th class="px-6 py-3 text-left text-xs font-medium uppercase">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-orange-200 text-sm">
+              <tr
+                *ngFor="let filme of filmes; let i = index"
+                [ngClass]="i % 2 === 0 ? 'bg-white' : 'bg-orange-50'"
+                
+              >
+                <td class="px-6 py-4">{{ filme.id }}</td>
+                <td class="px-6 py-4">{{ filme.genero }}</td>
+                <td class="px-6 py-4">{{ filme.titulo }}</td>
+                <td class="px-6 py-4">{{ filme.descricao }}</td>
+                
+                <td class="px-6 py-4 space-x-2">
+                  <!-- hover:text-blue-700 -->
+                  <button class="text-blue-500 opacity-70"><i class="fas fa-eye"></i></button>
+                  <button class="text-yellow-500 hover:text-yellow-700" (click)="updateModal(filme)"><i class="fas fa-edit"></i></button>
+                  <button class="text-red-500 hover:text-red-700" (click)="excluirFilme(filme.id!)" ><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Modal: Novo Filme -->
+        <div *ngIf="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
+            <h2 class="text-xl font-bold mb-4">Velox Play™: gestão de cadastro de filme</h2>
+            <hr class="mt-0 mb-8 border-t border-gray-400/30" />
+
+            <!-- Botão Fechar -->
+            <button (click)="confirmCloseModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">
+              &times;
+            </button>
+
+            <!-- Formulário 2 colunas -->
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-4" #filmeForm="ngForm">
+              <!-- Titulo -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Título<span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Coloque o nome do filme!</span>
+                </label>
+                <input
+                  [(ngModel)]="novoFilme.titulo"
+                  name="titulo"
+                  required
+                  type="text"
+                  placeholder="Ex.: Matrix Reloaded"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [ngClass]="{ 'border-red-500': filmeForm.submitted && !novoFilme.titulo }"
+                />
+              </div>
+
+              <!-- Gênero -->
+              <div class="relative">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Selecione o gênero<span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Escolha a categoria do filme!</span>
+                </label>
+
+                <select
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [(ngModel)]="novoFilme.genero"
+                  name="genero"
+                  required
+                >
+                  <option *ngFor="let g of generos" [value]="g">{{ g }}</option>
+                </select>
+
+
+                <!-- placeholder visual -->
+                <div
+                  *ngIf="!novoFilme.genero"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none select-none"
+                  style="top: calc(50% + 0.73rem);" 
+                >
+                  Selecione...
+                </div>
+              </div>
+
+              <!-- URL - Vídeo -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>URL do vídeo<span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Cole o link do vídeo do filme!</span>
+                </label>
+                <input
+                  [(ngModel)]="novoFilme.urlVideo"
+                  name="urlVideo"
+                  required
+                  type="url"
+                  placeholder="https://exemplo.com/video.mp4"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [ngClass]="{ 'border-red-500': filmeForm.submitted && !novoFilme.urlVideo }"
+                />
+              </div>
+
+              <!-- URL - Capa -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>URL da capa<span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Cole o link da imagem de capa!</span>
+                </label>
+                <input
+                  [(ngModel)]="novoFilme.urlCapa"
+                  name="urlCapa"
+                  required
+                  type="url"
+                  placeholder="https://exemplo.com/capa.jpg"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [ngClass]="{ 'border-red-500': filmeForm.submitted && !novoFilme.urlCapa }"
+                />
+              </div>
+
+              <!-- Descrição -->
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Descrição<span class="text-red-500">*</span></span>
+                  <span class="text-xs text-gray-500">Faça um breve resumo sobre o filme!</span>
+                </label>
+                <textarea
+                  [(ngModel)]="novoFilme.descricao"
+                  name="descricao"
+                  required
+                  rows="4"
+                  placeholder="Digite aqui a sinopse ou observações sobre o filme..."
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900 resize-none"
+                  [ngClass]="{ 'border-red-500': filmeForm.submitted && !novoFilme.descricao }"
+                ></textarea>
+              </div>
+            </form>
+
+            <hr class="mt-16 border-t border-gray-400/30" />
+
+            <!-- Ações -->
+            <div class="flex justify-end gap-4 mt-6">
+              <button (click)="confirmCloseModal()" class="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 transition duration-200">
+                Cancelar
+              </button>
+              <button (click)="adicionarFilme(filmeForm)"
+                class="px-4 py-2 bg-[#30384F] text-white rounded hover:bg-[#1f2535] transition duration-200">
+                Cadastrar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal: Editar Filme -->
+        <div *ngIf="isModalUpdate" class="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl relative">
+            <h2 class="text-xl font-bold mb-4">Velox Play™: atualizar dados do filme</h2>
+            <hr class="mt-0 mb-8 border-t border-gray-400/30" />
+
+            <!-- Botão Fechar -->
+            <button (click)="confirmCloseModal()" class="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+
+            <!-- Formulário -->
+            <form class="grid grid-cols-1 md:grid-cols-2 gap-4" #editForm="ngForm">
+
+              <!-- ID -->
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>ID do Filme</span>
+                  <span *ngIf="filmeEdit.id" class="text-xs text-gray-500 text-right">
+                    Campo não editável
+                  </span>
+                </label>
+                <input
+                  [(ngModel)]="filmeEdit.id"
+                  name="id"
+                  type="text"
+                  disabled
+                  class="w-full px-3 py-2 border rounded bg-gray-100 text-gray-500 cursor-not-allowed opacity-70 text-right"
+                />
+              </div>
+
+                <!-- Título -->
+                <div>
+                  <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                    <span>Título<span class="text-red-500">*</span></span>
+                    <span *ngIf="!inputStat" class="text-xs text-gray-500">Coloque o nome do filme!</span>
+                  </label>
+                  <input
+                    [(ngModel)]="filmeEdit.titulo"
+                    name="titulo"
+                    required
+                    type="text"
+                    placeholder="Ex.: Matrix Reloaded"
+                    [disabled]="inputStat"
+                    class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                    [ngClass]="{
+                      'border-red-500': editForm.submitted && !filmeEdit.titulo,
+                      'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                    }"
+                  />
+                </div>
+
+              <!-- Gênero -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Gênero<span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Selecione o gênero</span>
+                </label>
+                <select [(ngModel)]="filmeEdit.genero" name="genero" required [disabled]="inputStat"
+                        class="w-full px-3 py-2 border rounded bg-white text-gray-900"
+                        [ngClass]="{ 'border-red-500': editForm.submitted && !filmeEdit.genero,
+                                    'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat}">
+                  <option *ngFor="let g of generos" [value]="g">{{ g }}</option>
+                </select>
+              </div>
+
+              <!-- URL - Vídeo -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>URL do vídeo<span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Cole o link do vídeo do filme!</span>
+                </label>
+                <input
+                  [(ngModel)]="filmeEdit.urlVideo"
+                  name="urlVideo"
+                  required
+                  type="url"
+                  placeholder="https://exemplo.com/video.mp4"
+                  [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [ngClass]="{
+                    'border-red-500': editForm.submitted && !filmeEdit.urlVideo,
+                    'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                  }"
+                />
+              </div>
+
+              <!-- URL - Capa -->
+              <div>
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>URL da capa<span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Cole o link da imagem de capa!</span>
+                </label>
+                <input
+                  [(ngModel)]="filmeEdit.urlCapa"
+                  name="urlCapa"
+                  required
+                  type="url"
+                  placeholder="https://exemplo.com/capa.jpg"
+                  [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900"
+                  [ngClass]="{
+                    'border-red-500': editForm.submitted && !filmeEdit.urlCapa,
+                    'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                  }"
+                />
+              </div>
+
+
+              <!-- Descrição -->
+              <div class="md:col-span-2">
+                <label class="flex justify-between text-sm font-medium text-gray-700 mb-1">
+                  <span>Descrição<span class="text-red-500">*</span></span>
+                  <span *ngIf="!inputStat" class="text-xs text-gray-500">Faça um breve resumo sobre o filme!</span>
+                </label>
+                <textarea
+                  [(ngModel)]="filmeEdit.descricao"
+                  name="descricao"
+                  required
+                  rows="4"
+                  placeholder="Digite aqui a sinopse ou observações sobre o filme..."
+                  [disabled]="inputStat"
+                  class="w-full px-3 py-2 border rounded outline-none bg-white text-gray-900 resize-none"
+                  [ngClass]="{
+                    'border-red-500': editForm.submitted && !filmeEdit.descricao,
+                    'bg-gray-100 text-gray-500 cursor-not-allowed opacity-70': inputStat
+                  }"
+                ></textarea>
+              </div>
+            </form>
+
+            <hr class="mt-16 border-t border-gray-400/30" />
+
+            <!-- Ações -->
+            <div class="flex justify-end gap-4 mt-6">
+              <button (click)="confirmCloseModal()" class="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600">Cancelar</button>
+              <button (click)="editInput()" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-700">Editar</button>
+              <button [disabled]="inputStat" (click)="atualizarFilme(editForm)"
+                      class="px-4 py-2 bg-[#30384F] text-white rounded hover:bg-[#1f2535]"
+                      [ngClass]="{ 'cursor-not-allowed opacity-70': inputStat }"
+                      title="Para atualizar, destrave com o botão 'Editar'">
+                Atualizar
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

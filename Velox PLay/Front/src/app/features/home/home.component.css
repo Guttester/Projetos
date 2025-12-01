@@ -1,0 +1,141 @@
+/* ====== FORÇAR MODO CLARO A VENCER AS CORES ESCURAS DO HTML ====== */
+
+/* Fundo claro e texto escuro, com prioridade total */
+.light-theme {
+  background: linear-gradient(to bottom right, #e4e4e7, #f5f5f5, #e4e4e7) !important;
+  color: #0f172a !important;
+}
+
+/* Cartão do form no claro */
+.light-theme form {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.10) !important;
+}
+
+/* Inputs no claro (vencendo bg-slate-900/60 e text-slate-100 do HTML) */
+.light-theme input {
+  background-color: #eef2f6 !important; /* cinza claro confortável */
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Placeholder e labels mais suaves no claro */
+.light-theme input::placeholder { color: #6b7280 !important; }
+.light-theme label,
+.light-theme .text-slate-300,
+.light-theme .text-slate-200 { color: #334155 !important; }
+
+/* Checkbox no claro */
+.light-theme input[type="checkbox"] {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.25) !important;
+}
+
+/* Tema escuro segue normal (mantém o que você já tinha) */
+.dark-theme {
+  background: linear-gradient(to bottom right, #0f172a, #1e293b, #0f172a) !important;
+  color: #f8fafc !important;
+}
+.dark-theme form {
+  background-color: rgba(15, 23, 42, 0.60) !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.40) !important;
+}
+
+.dark-theme input {
+  background-color: rgba(30, 41, 59, 0.85) !important; /* um pouco mais claro */
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.dark-theme input::placeholder { color: #94a3b8 !important; }
+
+/* Transição suave */
+body, form, input { transition: background-color .25s ease, color .25s ease, border-color .25s ease; }
+
+/* ===== BOTÃO LOGIN ===== */
+
+/* força cor base no modo claro */
+.light-theme button[aria-label="Ir para Login"] {
+  background-color: #ffffff !important;
+  color: #fb923c !important; /* orange-400 */
+}
+
+/* hover mais equilibrado no modo claro */
+.light-theme button[aria-label="Ir para Login"]:hover {
+  color: #ea580c !important; /* orange-600 */
+}
+
+/* modo escuro segue sua lógica original, sem interferir */
+.dark-theme button[aria-label="Ir para Login"] {
+  background-color: #1e293b !important;
+  color: #fb923c !important;
+}
+
+.dark-theme button[aria-label="Ir para Login"]:hover {
+  color: #f97316 !important; /* laranja mais quente */
+}
+
+
+/* Corrige o botão da lua no modo claro */
+.light-theme button[aria-label="Alternar modo noturno"] {
+  background-color: #ffffff !important;
+  color: #fb923c !important; /* volta o laranja */
+}
+
+/* hover da lua */
+.light-theme button[aria-label="Alternar modo noturno"]:hover {
+  color: #ea580c !important; /* orange-600 */
+}
+
+/* ================== CARDS DE FILMES ================== */
+
+/* Light theme */
+.light-theme .card-filme {
+  background-color: #ffffff;
+  border: 2px solid rgba(251, 146, 60, 0.4); /* orange-400 leve */
+  box-shadow: 0 4px 10px rgba(251, 146, 60, 0.1);
+}
+
+.light-theme .card-filme:hover {
+  border-color: #f97316; /* orange-500 */
+  box-shadow: 0 0 15px 2px rgba(249, 115, 22, 0.4);
+  transform: translateY(-4px);
+}
+
+.light-theme .titulo-filme {
+  color: #0f172a;
+}
+
+.light-theme .genero-filme {
+  color: #475569;
+}
+
+/* Dark theme */
+.dark-theme .card-filme {
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 2px solid rgba(251, 146, 60, 0.3); /* brilho leve */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dark-theme .card-filme:hover {
+  border-color: #fb923c;
+  box-shadow: 0 0 15px 3px rgba(251, 146, 60, 0.5);
+  transform: translateY(-4px);
+}
+
+.dark-theme .titulo-filme {
+  color: #f8fafc;
+}
+
+.dark-theme .genero-filme {
+  color: #cbd5e1;
+}
+
+/* Transição geral */
+.card-filme {
+  transition: all 0.25s ease;
+}
+

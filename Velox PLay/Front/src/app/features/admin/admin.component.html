@@ -1,0 +1,46 @@
+<div class="flex min-h-screen bg-[#F4F6F8]">
+  <app-sidebar-left  (expandedChange)="onSidebarToggle($event)"></app-sidebar-left>>
+
+    <!-- Bloco que move junto com o sidebar -->
+  <div class="flex flex-col flex-1 transition-all duration-300" [ngClass]="{ 'pl-60': isSidebarExpanded, 'pl-16': !isSidebarExpanded }">
+
+    <!-- Topbar dentro do mesmo bloco -->
+    <app-topbar></app-topbar>
+
+    <!-- dashboard -->
+    <section class="min-h-screen bg-gradient-to-br p-6">
+      <div class="min-h-[90vh] bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold text-orange-500 mb-8">Painel de Controle</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- CARD 1 -->
+          <div class="bg-orange-50/60 border border-orange-300/40 rounded-2xl p-6 shadow-md hover:shadow-xl hover:bg-orange-100/80 transition-all duration-300">
+            <p class="text-sm text-orange-700">Total de Filmes</p>
+            <h3 class="text-4xl font-bold text-orange-500 mt-1">128</h3>
+            <p class="text-xs text-orange-600 mt-1">+12 esta semana</p>
+          </div>
+
+          <!-- CARD 2 -->
+          <div class="bg-blue-50/60 border border-blue-300/40 rounded-2xl p-6 shadow-md hover:shadow-xl hover:bg-blue-100/80 transition-all duration-300">
+            <p class="text-sm text-blue-700">Usuários Ativos</p>
+            <h3 class="text-4xl font-bold text-blue-500 mt-1">842</h3>
+            <p class="text-xs text-blue-600 mt-1">+32 nas últimas 24h</p>
+          </div>
+
+          <!-- CARD 3 -->
+          <div class="bg-green-50/60 border border-green-300/40 rounded-2xl p-6 shadow-md hover:shadow-xl hover:bg-green-100/80 transition-all duration-300">
+            <p class="text-sm text-green-700">Favoritos</p>
+            <h3 class="text-4xl font-bold text-green-500 mt-1">456</h3>
+            <p class="text-xs text-green-600 mt-1">+7 desde ontem</p>
+          </div>
+        </div>
+
+        <!-- LINHA LARANJA -->
+        <div class="h-[2px] w-full bg-orange-500 rounded-full mt-10 "></div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+
